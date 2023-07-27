@@ -41,7 +41,7 @@ class Value:
 
         def _backward():
             self.grad += (other.data * self.data ** (other.data - 1)) * out.grad
-            other.grad += (self.data ** other.data * math.log(self.data)) * out.grad
+            other.grad += (self.data ** other.data * math.log(abs(self.data))) * out.grad
         out._backward = _backward
 
         return out
@@ -82,7 +82,19 @@ class Value:
 
     def __rtruediv__(self, other): # other / self
         return other * self**-1
+    
+    def zero_grad(self):
+        self.grad = 0.0
+        for child in self._prev:
+            child.zero_grad()
 
-a = Value(-2)
-b = Value(3)
-print(a - b)
+    def abs(self):
+        return self if self.data >= 0 else -self
+
+    def step(self, lr):
+        self.data -= lr * self.grad
+        for child in self._prev:
+            child.step(lr)
+    
+    def float(self):
+        return float(self.data)
