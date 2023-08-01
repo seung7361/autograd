@@ -2,7 +2,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
-class Value:
+class Tensor:
     def __init__(self, data, _children=(), _op=""):
         self.data = float(data)
         self.grad = 0.0
@@ -11,11 +11,11 @@ class Value:
         self._op = _op
     
     def __repr__(self):
-        return f"Value(data={self.data}, grad={self.grad})"
+        return f"Tensor(data={self.data}, grad={self.grad})"
 
     def __add__(self, other):
-        other = other if isinstance(other, Value) else Value(other)
-        out = Value(self.data + other.data, (self, other), "+")
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        out = Tensor(self.data + other.data, (self, other), "+")
 
         def _backward():
             self.grad += out.grad
@@ -25,8 +25,8 @@ class Value:
         return out
 
     def __mul__(self, other):
-        other = other if isinstance(other, Value) else Value(other)
-        out = Value(self.data * other.data, (self, other), "*")
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        out = Tensor(self.data * other.data, (self, other), "*")
 
         def _backward():
             self.grad += other.data * out.grad
@@ -36,8 +36,8 @@ class Value:
         return out
 
     def __pow__(self, other):
-        other = other if isinstance(other, Value) else Value(other)
-        out = Value(self.data ** other.data, (self, other), "**")
+        other = other if isinstance(other, Tensor) else Tensor(other)
+        out = Tensor(self.data ** other.data, (self, other), "**")
 
         def _backward():
             self.grad += (other.data * self.data ** (other.data - 1)) * out.grad
